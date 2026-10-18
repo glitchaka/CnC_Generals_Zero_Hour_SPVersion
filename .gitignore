@@ -1,0 +1,5 @@
+# Local build output
+build-sp/
+
+# Extracted retail game assets stay local; the extractor recreates them from an installed copy.
+GameAssetsExtracted/
