@@ -27,8 +27,8 @@ target_include_directories(sp_smoke PRIVATE
 )
 
 if(WIN32)
-    add_executable(sp_demo WIN32 demo_visceroid_playtest.cpp)
-    target_link_libraries(sp_demo PRIVATE sp_core user32 gdi32)
+    add_executable(sp_demo WIN32 demo_cc0_textured.cpp)
+    target_link_libraries(sp_demo PRIVATE sp_core user32 gdi32 gdiplus)
     target_include_directories(sp_demo PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/../GeneralsMD/Code/GameEngine/Include
     )
