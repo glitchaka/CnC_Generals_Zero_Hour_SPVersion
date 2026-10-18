@@ -26,5 +26,13 @@ target_include_directories(sp_smoke PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../GeneralsMD/Code/GameEngine/Include
 )
 
+if(WIN32)
+    add_executable(sp_demo WIN32 demo_win32.cpp)
+    target_link_libraries(sp_demo PRIVATE sp_core user32 gdi32)
+    target_include_directories(sp_demo PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/../GeneralsMD/Code/GameEngine/Include
+    )
+endif()
+
 enable_testing()
 add_test(NAME sp_smoke COMMAND sp_smoke)
