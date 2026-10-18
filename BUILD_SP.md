@@ -1,43 +1,48 @@
 # Build notes for SPVersion
 
-This fork is still based on the original Command & Conquer: Generals / Zero Hour Visual C++ 6 project layout. The Zero Hour workspace is:
+## Modern SP core build
 
-`GeneralsMD/Code/RTS.dsw`
+The SP prototype no longer requires the original proprietary/obsolete SDK set just to compile and validate its new game logic.
 
-## Fastest path to a build
+Requirements:
 
-1. Use Windows x86 tooling.
-2. Install Visual C++ 6.0 SP6, or convert `RTS.dsw` through Visual Studio .NET 2003 before opening the converted solution in a newer Visual Studio.
-3. Restore/provide the legacy dependencies documented in the root `README.md` under the exact paths expected below `GeneralsMD/Code/`.
-4. Put an installed Steam build of Zero Hour in `GeneralsMD/Run/` as indicated by `place_steam_build_here.txt`.
-5. Open `GeneralsMD/Code/RTS.dsw`.
-6. Select the Zero Hour/RTS release configuration and run **Build -> Batch Build -> Rebuild All**.
-7. The generated binaries are copied to `GeneralsMD/Run/`.
+- Windows 10/11
+- Visual Studio 2022 Build Tools or Visual Studio 2022 with **Desktop development with C++**
+- CMake 3.24+
 
-## Required legacy dependencies
+Build from the repository root:
 
-The original release expects at least:
+```bat
+build_sp.cmd
+```
 
-- DirectX SDK 9
-- STLport 4.5.3 (apply the repository `stlport.diff`)
-- 3DS Max 4 SDK
-- NVASM
-- BYTEmark
-- Miles Sound System SDK / Asimp3
-- Bink SDK
-- SafeDisk API
-- GameSpy SDK
-- ZLib 1.1.4
-- LZH-Light 1.0
+That command configures a 32-bit MSVC build, compiles the SP core and runs the smoke test.
 
-The repository already contains part of `Code/Libraries`, but it does not contain every proprietary SDK required by the original project.
+The modern target currently compiles these systems directly from the Zero Hour fork:
 
-## Important: current SP prototype status
+- `SporeVoxelWorld` — voxel terrain/resource simulation
+- `SporeCreature` — modular creature stats and locomotion
+- `SporeEvolution` — visceroid-to-organ evolution progression
 
-The new SP/voxel/evolution source has been added to the fork, but the project is not yet at the point where I consider the new prototype a validated runnable build. The original workspace can only compile the new code after the new `.cpp` files are wired into the relevant Visual C++ projects and the lifecycle hooks are connected to the actual Zero Hour game loop.
+The target intentionally bypasses the original `PreRTS.h` dependency with a standalone shim, so it does **not** require STLport, Miles, Bink, GameSpy, SafeDisk, 3DS Max 4 SDK, NVASM or BYTEmark.
 
-Do not expect the current branch to produce the new creature prototype merely by rebuilding the untouched original workspace yet.
+CI also builds and tests this target on `windows-latest` through `.github/workflows/sp-modern-build.yml`.
 
-## Intended end state
+## Legacy Zero Hour engine
 
-The target is to remove the need for Visual C++ 6 as a day-to-day workflow and provide a reproducible modern Windows build. Until that migration is complete, the legacy `RTS.dsw` route above is the authoritative build path for the original engine.
+The original engine remains in `GeneralsMD/Code/RTS.dsw`. Its historical build expects a number of obsolete SDKs. Those are no longer prerequisites for working on or validating the SP core.
+
+The migration strategy for the full executable is to remove those legacy dependencies subsystem by subsystem instead of asking contributors to locate them:
+
+- Direct3D: use the modern Windows SDK / replacement renderer integration;
+- STLport: migrate to the standard MSVC C++ library;
+- 3DS Max SDK, NVASM and BYTEmark: exclude old content/tool/benchmark projects from the runtime build;
+- Miles / Asimp3: replace with a modern audio backend;
+- Bink: remove proprietary video dependency from the SP runtime;
+- SafeDisk: remove obsolete DRM hooks;
+- GameSpy: remove legacy online services from this single-player fork;
+- ZLib/LZH: replace through maintained source/package equivalents where archive compatibility is required.
+
+## Runtime integration status
+
+The SP core now has an independent modern build and test path. The next engine-migration work is connecting that validated core to Zero Hour's W3D rendering, input, camera and object lifecycle while keeping the modern build free of the old proprietary SDK requirements.
