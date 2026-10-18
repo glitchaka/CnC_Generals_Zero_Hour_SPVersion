@@ -7,21 +7,14 @@ if errorlevel 1 (
   exit /b 1
 )
 
-rem Retail assets are not stored in git. Extract them automatically from the
-rem local Zero Hour installation before building the playable demo.
-if not exist "GameAssetsExtracted\ZeroHour\asset_manifest.csv" (
+rem Curated CC0 assets are fetched automatically for the prototype.
+if not exist "ExternalAssets\PolyHaven\manifest.csv" (
   echo.
-  echo Buscando instalacion local de Zero Hour y extrayendo recursos...
-  if defined ZH_GAME_PATH (
-    powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\extract_zh_assets.ps1" -GamePath "%ZH_GAME_PATH%"
-  ) else (
-    powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\extract_zh_assets.ps1"
-  )
+  echo Descargando recursos CC0 seleccionados para el prototipo...
+  powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\fetch_cc0_assets.ps1"
   if errorlevel 1 (
     echo.
-    echo ERROR: No pude localizar o extraer los recursos retail de Zero Hour.
-    echo El demo ya no debe caer silenciosamente al terreno procedural.
-    echo Si el juego esta en una ruta no estandar, define ZH_GAME_PATH una sola vez.
+    echo ERROR: No pude descargar los recursos CC0 requeridos.
     exit /b 1
   )
 )
