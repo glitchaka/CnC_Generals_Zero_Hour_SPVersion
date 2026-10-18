@@ -27,7 +27,7 @@ target_include_directories(sp_smoke PRIVATE
 )
 
 if(WIN32)
-    add_executable(sp_demo WIN32 demo_win32_v2.cpp)
+    add_executable(sp_demo WIN32 demo_voxelmass.cpp)
     target_link_libraries(sp_demo PRIVATE sp_core user32 gdi32)
     target_include_directories(sp_demo PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/../GeneralsMD/Code/GameEngine/Include
