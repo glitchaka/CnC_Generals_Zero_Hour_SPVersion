@@ -31,6 +31,16 @@ if not exist "ExternalAssets\KayKitAdventurers\Knight.glb" (
   )
 )
 
+if not exist "ExternalAssets\KenneyUI\panel_blue.png" (
+  echo.
+  echo Preparando interfaz Kenney UI...
+  powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\fetch_kenney_ui.ps1"
+  if errorlevel 1 (
+    echo ERROR: No pude preparar Kenney UI.
+    exit /b 1
+  )
+)
+
 tasklist /FI "IMAGENAME eq sp_demo.exe" 2>nul | find /I "sp_demo.exe" >nul
 if not errorlevel 1 (
   echo Cerrando instancia anterior de sp_demo.exe...
