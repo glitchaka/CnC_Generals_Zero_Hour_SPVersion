@@ -32,7 +32,6 @@ static void buildTerrainPlayable(){
 
 static void buildScenePlayable(){
     g_scene.clear(); auto add=[&](MeshGPU&m,float x,float z,float yaw,float s,bool c=true){g_scene.push_back({&m,x,z,yaw,s,c});};
-    // Props distributed over a wide continuous terrain; no floor slabs.
     add(g_crates,-52,44,.25f,1.45f); add(g_barrel,-36,48,-.5f,1.5f); add(g_rubble,-18,41,.8f,1.55f); add(g_barrel,8,49,.15f,1.45f); add(g_crates,36,43,-.65f,1.35f); add(g_rubble,58,33,-.8f,1.45f);
     add(g_rubble,-62,20,1.7f,1.25f); add(g_barrel,-40,17,.2f,1.55f); add(g_crates,-15,19,.55f,1.25f); add(g_rubble,16,23,2.2f,1.30f); add(g_crates,43,18,-.3f,1.40f); add(g_barrel,64,12,.4f,1.45f);
     add(g_rubble,-68,-8,.3f,1.6f); add(g_crates,-46,-13,.7f,1.3f); add(g_barrel,-20,-16,-.2f,1.55f); add(g_rubble,11,-12,1.1f,1.35f); add(g_crates,39,-19,-.45f,1.45f); add(g_barrel,65,-23,.1f,1.50f);
@@ -47,7 +46,6 @@ static void applyCohesionPlayable(float stiff){
     float inv=1.f/float((std::max)(1u,g_surfaceCount)); sx=sqrtf(sx*inv); sy=sqrtf(sy*inv); sz=sqrtf(sz*inv);
     float yLoss=clampf((g_restRms.y-sy)/(g_restRms.y+.001f),-.7f,.9f);
     float spread=((sx+sz)-(g_restRms.x+g_restRms.z))/(g_restRms.x+g_restRms.z+.001f);
-    // Force-based yield stress/surface tension approximation: no direct shape projection.
     float compactK=36.f+10.f*stiff, liftK=118.f+22.f*stiff;
     for(uint32_t i=0;i<g_surfaceCount;++i){
         XMFLOAT3 r=sub3(g_nodes[i].p,g_com); float rl=len3(r); if(rl<1e-4f)continue;
@@ -63,10 +61,8 @@ static void applyDrivePlayable(float ix,float iz){
     XMFLOAT3 axis=norm3({iz,0,-ix});
     std::vector<uint32_t> contact,upper; contact.reserve(g_surfaceCount/4); upper.reserve(g_surfaceCount/3);
     for(uint32_t i=0;i<g_surfaceCount;++i){float floorY=groundH(g_nodes[i].p.x,g_nodes[i].p.z);XMFLOAT3 r=sub3(g_nodes[i].p,g_com);if(g_nodes[i].p.y-floorY<.16f)contact.push_back(i);if(r.y>.30f)upper.push_back(i);}
-    // Internal circulation: top forward/front down/bottom backward/rear up.
     const float torque=10.5f;
     for(uint32_t i=0;i<g_surfaceCount;++i){XMFLOAT3 r=sub3(g_nodes[i].p,g_com);g_nodes[i].f=add3(g_nodes[i].f,mul3(cross3(axis,r),torque));}
-    // Traction assist remains an internal force pair; ground friction supplies the external reaction.
     if(!contact.empty()&&!upper.empty()){
         const float traction=85.f; float cf=traction/float(contact.size()),uf=traction/float(upper.size());
         XMFLOAT3 back={-ix*cf,0,-iz*cf},front={ix*uf,0,iz*uf};
@@ -111,6 +107,7 @@ static LRESULT CALLBACK playableWnd(HWND h,UINT m,WPARAM w,LPARAM l){
     switch(m){case WM_ERASEBKGND:return 1;case WM_NCHITTEST:{LRESULT r=DefWindowProcW(h,m,w,l);return r==HTCLIENT?HTCAPTION:r;}case WM_SIZE:if(g_swap&&w!=SIZE_MINIMIZED){resizeSwap(LOWORD(l),HIWORD(l));if(g_hudWnd)MoveWindow(g_hudWnd,12,12,(std::min)(760,g_w-24),64,TRUE);}return 0;case WM_MOUSEWHEEL:g_zoom*=GET_WHEEL_DELTA_WPARAM(w)>0?.90f:1.11f;g_zoom=clampf(g_zoom,.48f,2.8f);return 0;case WM_KEYDOWN:if(w<256)g_keys[w]=true;if(w=='F'){g_followCamera=true;g_camPanX=g_camPanZ=0;}if(w==VK_ESCAPE)DestroyWindow(h);return 0;case WM_KEYUP:if(w<256)g_keys[w]=false;return 0;case WM_KILLFOCUS:for(bool&k:g_keys)k=false;return 0;case WM_DESTROY:PostQuitMessage(0);return 0;}return DefWindowProcW(h,m,w,l);
 }
 
+#ifndef SP_PLAYABLE_NO_ENTRYPOINT
 int WINAPI wWinMain(HINSTANCE hi,HINSTANCE,PWSTR,int){
     CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED);WNDCLASSW wc{};wc.hInstance=hi;wc.lpfnWndProc=playableWnd;wc.lpszClassName=L"SP_D3D11_PLAYABLE";wc.hCursor=LoadCursor(nullptr,IDC_ARROW);RegisterClassW(&wc);WNDCLASSW hc{};hc.hInstance=hi;hc.lpfnWndProc=hudProc;hc.lpszClassName=L"SP_HUD";hc.hCursor=LoadCursor(nullptr,IDC_ARROW);RegisterClassW(&hc);
     RECT wa{};SystemParametersInfoW(SPI_GETWORKAREA,0,&wa,0);int aw=wa.right-wa.left,ah=wa.bottom-wa.top;g_w=(std::min)(1440,(std::max)(900,aw-80));g_h=(std::min)(900,(std::max)(650,ah-80));g_w=(std::min)(g_w,aw);g_h=(std::min)(g_h,ah);int x=wa.left+(aw-g_w)/2,y=wa.top+(ah-g_h)/2;g_hwnd=CreateWindowExW(0,wc.lpszClassName,L"SPVersion",WS_POPUP|WS_VISIBLE,x,y,g_w,g_h,nullptr,nullptr,hi,nullptr);if(!g_hwnd)return 1;
@@ -118,3 +115,4 @@ int WINAPI wWinMain(HINSTANCE hi,HINSTANCE,PWSTR,int){
     if(!initD3D()){MessageBoxW(g_hwnd,L"No pude cargar las texturas requeridas.",L"SPVersion",MB_ICONERROR);return 2;}buildTerrainPlayable();bool ok=true;ok&=loadOBJ(L"ExternalAssets\\KayKitDungeon\\rubble_large.obj",g_rubble);ok&=loadOBJ(L"ExternalAssets\\KayKitDungeon\\crates_stacked.obj",g_crates);ok&=loadOBJ(L"ExternalAssets\\KayKitDungeon\\barrel_large.obj",g_barrel);if(!ok){MessageBoxW(g_hwnd,L"No pude cargar la geometria KayKit incluida en el proyecto.",L"SPVersion",MB_ICONERROR);return 3;}buildScenePlayable();buildBlob();initRestShape();g_cam=g_com;
     LARGE_INTEGER fq,p,n;QueryPerformanceFrequency(&fq);QueryPerformanceCounter(&p);MSG msg{};bool run=true;while(run){while(PeekMessageW(&msg,nullptr,0,0,PM_REMOVE)){if(msg.message==WM_QUIT){run=false;break;}TranslateMessage(&msg);DispatchMessageW(&msg);}QueryPerformanceCounter(&n);float dt=(float)((double)(n.QuadPart-p.QuadPart)/fq.QuadPart);p=n;dt=(std::min)(dt,.018f);syncClientSize();updatePlayable(dt);renderPlayable();Sleep(1);}killMesh(g_barrel);killMesh(g_crates);killMesh(g_rubble);killMesh(g_blob);killMesh(g_terrain);rel(g_kaySRV);rel(g_groundSRV);rel(g_sampler);rel(g_cb);rel(g_layout);rel(g_ps);rel(g_vs);destroySize();rel(g_swap);rel(g_ctx);rel(g_dev);CoUninitialize();return 0;
 }
+#endif
