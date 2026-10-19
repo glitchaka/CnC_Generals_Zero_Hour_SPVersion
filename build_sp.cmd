@@ -41,7 +41,8 @@ if not exist "ExternalAssets\KenneyUI\panel_blue.png" (
 tasklist /FI "IMAGENAME eq sp_demo.exe" 2>nul | find /I "sp_demo.exe" >nul
 if not errorlevel 1 taskkill /F /IM sp_demo.exe >nul 2>nul
 
-cmake -S SPBuild -B build-sp -A Win32
+if exist "build-sp\CMakeCache.txt" rmdir /S /Q "build-sp"
+cmake -S SPBuild -B build-sp -A x64
 if errorlevel 1 exit /b 1
 
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\patch_sp_release.ps1" -SourcePath "%~dp0build-sp\demo_d3d11_human_release.cpp"
@@ -100,7 +101,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command "Compress-Archive -Path '
 if errorlevel 1 exit /b 1
 
 echo.
-echo SPVersion: mapa principal MOBA compilado, validado y empaquetado.
+echo SPVersion x64: mapa principal MOBA compilado, validado y empaquetado.
 echo Ejecutable: dist\SPVersion-demo\SPVersion.exe
 echo Paquete:    dist\SPVersion-demo.zip
 endlocal
