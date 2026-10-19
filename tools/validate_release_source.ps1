@@ -12,16 +12,15 @@ $required=@(
   'g_mobsRemaining/12.f',
   'g_waveNumber',
   'resolvePlayerMobCollision()',
-  'target>=6.f?ey',
-  'target=p.find(L"tower")!=std::wstring::npos?18.0f:24.0f',
   'buildHexFloor()',
-  'g_hexFloorTextured',
-  'g_hexFloorTransit',
-  'Huella exterior real de hex_grass.obj',
-  'groundH(x,z)+.105f',
+  'loadFloorTileCPU',
+  'appendFloorTile',
+  'hex_grass.obj',
   'blocksGameplay(cx,cz,S*1.16f)',
   'drawMeshWorld(g_hexFloorTextured,XMMatrixIdentity(),{1,1,1,1},1,g_groundSRV)',
   'drawMeshWorld(g_hexFloorTransit',
+  'addSceneMeshNatural',
+  '1.0f,coll,tex,tint,yoff',
   'g_boundaryWallMesh',
   'const int N=80',
   'g_dungeonFullSRV',
@@ -39,11 +38,12 @@ $forbidden=@(
   'buildLaneRibbon(laneMid(),1);',
   'buildLaneRibbon(laneBot(),2);',
   'drawCharacter(g_npc);',
-  'g_gameState=GameState::Victory',
   'R - REINICIAR',
+  'Victory&&keyPressed(''R'')',
+  'Victory && keyPressed(''R'')',
   '392.f*g_enemyHealth',
   'if(g_player.health<=0.f)g_gameState=GameState::Defeated;'
 )
 foreach($token in $forbidden){if($code.Contains($token)){throw "Release invalido: todavia contiene $token"}}
 
-Write-Host 'Fuente final validado: piso de piezas sin huecos, transito sin textura, arquitectura a escala, NPC/oleadas, muro continuo, combate animado y sin reinicio de victoria.'
+Write-Host 'Fuente final validado: rombos originales calzados sin huecos, suelo texturizado salvo transito, construcciones a escala natural y victoria sin reinicio.'
