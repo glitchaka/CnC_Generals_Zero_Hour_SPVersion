@@ -32,10 +32,10 @@ RR 'g_blueTowerMesh=g_redTowerMesh=g_blueCoreMesh=g_redCoreMesh=nullptr;' 'g_blu
 
 RR 'if(!g_attackDidHit&&phase>=.40f){g_attackDidHit=true;' 'if(!g_attackDidHit&&phase>=.40f){g_attackDidHit=true;damageNearestMob();' 'ataque contra mobs'
 
-$loopPattern='updateNPC\(dt\);(?:resolveCharacterPair\(g_player,g_npc\);)?updateCamera\(dt\);'
-$loopReplacement='updateNPC(dt);updateMobs(dt);resolveCharacterPair(g_player,g_npc);updateCamera(dt);'
-$loopNew=[regex]::Replace($code,$loopPattern,$loopReplacement,1)
-if($loopNew -eq $code){throw 'No encontre: actualizacion de mobs'}
+# Inserta la actualizacion de mobs junto a la llamada real a updateNPC, sin depender
+# de la forma exacta que otros parches hayan dado al resto del bucle principal.
+$loopNew=[regex]::Replace($code,'updateNPC\s*\(\s*dt\s*\)\s*;','updateNPC(dt);updateMobs(dt);',1)
+if($loopNew -eq $code){throw 'No encontre: llamada updateNPC(dt) del bucle principal'}
 $code=$loopNew
 
 $renderAnchor='static void render(){'
