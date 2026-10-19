@@ -1,21 +1,24 @@
 # SPVersion
 
-SPVersion es un proyecto de juego independiente construido a partir del código fuente liberado de **Command & Conquer: Generals / Zero Hour** como base técnica.
+SPVersion es un proyecto de juego independiente para Windows.
 
-Este repositorio **no pretende conservar ni reconstruir C&C Generals**. El código original se está reutilizando y modificando para desarrollar otro juego, con su propia jugabilidad, mapa, presentación, recursos y sistemas.
+La demo actual se compila desde `SPBuild/` como un ejecutable C++17 x64 con Direct3D 11. El pipeline genera `demo_d3d11_human_release.cpp`, aplica los parches de `tools/`, compila el ejecutable y empaqueta sus recursos externos.
+
+El repositorio se originó a partir de una copia del código fuente liberado de **Command & Conquer: Generals / Zero Hour**, por lo que todavía contiene los directorios heredados `Generals/` y `ZeroHour/`. Esos directorios no forman parte del target actual `SPVersion.exe` ni son la implementación de la demo actual.
 
 ## Estado actual
 
-El proyecto contiene actualmente una demo jugable tipo MOBA en Windows, con:
+El proyecto contiene una demo jugable tipo MOBA con:
 
 - mapa propio;
 - tres carriles y zonas transitables;
-- suelo modular basado en piezas del pack KayKit;
-- estructuras y torres a escala natural;
+- suelo modular basado en piezas KayKit;
+- estructuras y torres;
 - oleadas y enemigos;
 - combate y respawn;
-- assets externos de prueba integrados en el pipeline;
-- compilación x64 mediante CMake y MSVC.
+- assets externos preparados por el pipeline;
+- compilación x64 mediante CMake y MSVC;
+- renderizado Direct3D 11.
 
 ## Compilación
 
@@ -32,17 +35,18 @@ dist/SPVersion-demo/SPVersion.exe
 dist/SPVersion-demo.zip
 ```
 
-## Estructura relevante
+## Arquitectura actual
 
-- `SPBuild/` — proyecto moderno usado para generar la demo.
-- `tools/` — scripts de preparación, parcheado y validación del build.
-- `ExternalAssets/` — recursos externos preparados por los scripts de build.
-- `Generals/` y `ZeroHour/` — código heredado utilizado como base técnica.
+- `SPBuild/` — código fuente y configuración CMake del ejecutable actual.
+- `tools/` — scripts que transforman, preparan y validan el fuente de release antes de compilar.
+- `ExternalAssets/` — recursos externos utilizados por la demo.
+- `Generals/` — código heredado de Command & Conquer: Generals conservado en el repositorio.
+- `ZeroHour/` — código heredado de Command & Conquer: Generals – Zero Hour conservado en el repositorio.
 
-## Origen del código y licencia
+El target actual de SPVersion no compila `Generals/` ni `ZeroHour/` como parte de `SPVersion.exe`.
 
-Este proyecto deriva del código fuente publicado de **Command & Conquer: Generals** y **Command & Conquer: Generals – Zero Hour**.
+## Origen y licencias
 
-El código heredado mantiene las condiciones de licencia aplicables del proyecto original. Consulta `LICENSE.md` y los avisos de licencia existentes en el repositorio.
+Los directorios heredados de Command & Conquer conservan las condiciones de licencia que les correspondan según el código fuente publicado originalmente. Consulta `LICENSE.md` y los avisos existentes en esos componentes.
 
-Los assets externos incluidos o descargados por los scripts conservan sus respectivas licencias y condiciones de uso.
+Los recursos externos utilizados por SPVersion conservan sus propias licencias y condiciones de uso.
