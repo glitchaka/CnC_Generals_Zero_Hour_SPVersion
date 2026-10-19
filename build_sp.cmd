@@ -48,7 +48,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\patch_sp_release
 if errorlevel 1 exit /b 1
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\patch_animation_release.ps1" -SourcePath "%~dp0build-sp\demo_d3d11_human_release.cpp"
 if errorlevel 1 exit /b 1
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\patch_world_release.ps1" -SourcePath "%~dp0build-sp\demo_d3d11_human_release.cpp"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Remove-Item Alias:R -ErrorAction SilentlyContinue; & '%~dp0tools\patch_world_release.ps1' -SourcePath '%~dp0build-sp\demo_d3d11_human_release.cpp'"
 if errorlevel 1 exit /b 1
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\patch_equipment_release.ps1" -SourcePath "%~dp0build-sp\demo_d3d11_human_release.cpp"
 if errorlevel 1 exit /b 1
