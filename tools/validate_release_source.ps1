@@ -12,11 +12,13 @@ $required=@(
   'g_mobsRemaining/12.f',
   'g_waveNumber',
   'resolvePlayerMobCollision()',
-  'target>=8.f?ey',
+  'target>=6.f?ey',
+  'target=p.find(L"tower")!=std::wstring::npos?18.0f:24.0f',
   'buildHexFloor()',
   'g_hexFloorTextured',
   'g_hexFloorTransit',
   'Huella exterior real de hex_grass.obj',
+  'groundH(x,z)+.105f',
   'blocksGameplay(cx,cz,S*1.16f)',
   'drawMeshWorld(g_hexFloorTextured,XMMatrixIdentity(),{1,1,1,1},1,g_groundSRV)',
   'drawMeshWorld(g_hexFloorTransit',
@@ -44,4 +46,4 @@ $forbidden=@(
 )
 foreach($token in $forbidden){if($code.Contains($token)){throw "Release invalido: todavia contiene $token"}}
 
-Write-Host 'Fuente final validado: piso hexagonal sin huecos y con textura de suelo, transito sin textura, NPC/oleadas, muro perimetral Dungeon continuo, combate animado y respawn automatico.'
+Write-Host 'Fuente final validado: piso de piezas sin huecos, transito sin textura, arquitectura a escala, NPC/oleadas, muro continuo, combate animado y sin reinicio de victoria.'
