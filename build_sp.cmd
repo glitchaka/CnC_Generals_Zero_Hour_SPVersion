@@ -29,14 +29,16 @@ if not exist "ExternalAssets\KayKitAdventurers\Knight.glb" goto fetch_adventurer
 if not exist "ExternalAssets\KayKitAdventurers\sword_1handed.obj" goto fetch_adventurers
 if not exist "ExternalAssets\KayKitAdventurers\sword_2handed.obj" goto fetch_adventurers
 if not exist "ExternalAssets\KayKitAdventurers\shield_round.obj" goto fetch_adventurers
+if not exist "ExternalAssets\KayKitAdventurers\Rig_Medium_CombatMelee.glb" goto fetch_adventurers
+if not exist "ExternalAssets\KayKitAdventurers\Rig_Medium_MovementAdvanced.glb" goto fetch_adventurers
 goto adventurers_ready
 
 :fetch_adventurers
 echo.
-echo Preparando personajes y armas KayKit Adventurers...
+echo Preparando personajes, armas y animaciones KayKit...
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\fetch_kaykit_adventurers.ps1"
 if errorlevel 1 (
-  echo ERROR: No pude preparar personajes/armas KayKit Adventurers.
+  echo ERROR: No pude preparar personajes/armas/animaciones KayKit.
   exit /b 1
 )
 
