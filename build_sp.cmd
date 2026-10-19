@@ -16,9 +16,12 @@ if not exist "ExternalAssets\PolyHaven\manifest.csv" (
 
 if not exist "ExternalAssets\KayKitDungeon\crates_stacked.obj" (
   echo.
-  echo Importando escenario KayKit Dungeon...
-  powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\import_kaykit_dungeon.ps1"
-  if errorlevel 1 exit /b 1
+  echo Preparando escenario KayKit Dungeon...
+  powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\fetch_kaykit_dungeon.ps1"
+  if errorlevel 1 (
+    echo ERROR: No pude preparar KayKit Dungeon.
+    exit /b 1
+  )
 )
 
 if not exist "ExternalAssets\KayKitAdventurers\Knight.glb" (
