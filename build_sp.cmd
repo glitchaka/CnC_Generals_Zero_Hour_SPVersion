@@ -1,5 +1,6 @@
 @echo off
 setlocal
+cd /d "%~dp0"
 
 where cmake >nul 2>nul
 if errorlevel 1 (
@@ -65,6 +66,29 @@ if errorlevel 1 exit /b 1
 ctest --test-dir build-sp -C Release --output-on-failure
 if errorlevel 1 exit /b 1
 
+set "DIST=%~dp0dist\SPVersion-demo"
+if exist "%DIST%" rmdir /S /Q "%DIST%"
+mkdir "%DIST%"
+mkdir "%DIST%\ExternalAssets"
+
+copy /Y "build-sp\Release\sp_demo.exe" "%DIST%\SPVersion.exe" >nul
+copy /Y "SPBuild\DEMO_README.txt" "%DIST%\README.txt" >nul
+
+xcopy /E /I /Y /Q "ExternalAssets\KayKitDungeon" "%DIST%\ExternalAssets\KayKitDungeon" >nul
+if errorlevel 1 exit /b 1
+xcopy /E /I /Y /Q "ExternalAssets\KayKitAdventurers" "%DIST%\ExternalAssets\KayKitAdventurers" >nul
+if errorlevel 1 exit /b 1
+xcopy /E /I /Y /Q "ExternalAssets\KenneyUI" "%DIST%\ExternalAssets\KenneyUI" >nul
+if errorlevel 1 exit /b 1
+xcopy /E /I /Y /Q "ExternalAssets\PolyHaven" "%DIST%\ExternalAssets\PolyHaven" >nul
+if errorlevel 1 exit /b 1
+
+if exist "dist\SPVersion-demo.zip" del /Q "dist\SPVersion-demo.zip"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Compress-Archive -Path '%DIST%\*' -DestinationPath '%~dp0dist\SPVersion-demo.zip' -CompressionLevel Optimal -Force"
+if errorlevel 1 exit /b 1
+
 echo.
-echo SP demo compilado y validado correctamente.
+echo SPVersion demo compilado, validado y empaquetado.
+echo Ejecutable: dist\SPVersion-demo\SPVersion.exe
+echo Paquete:    dist\SPVersion-demo.zip
 endlocal
