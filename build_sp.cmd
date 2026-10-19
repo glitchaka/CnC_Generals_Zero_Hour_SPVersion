@@ -69,6 +69,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\patch_animation_
 if errorlevel 1 exit /b 1
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\patch_world_release.ps1" -SourcePath "%~dp0build-sp\demo_d3d11_human_release.cpp"
 if errorlevel 1 exit /b 1
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\patch_equipment_release.ps1" -SourcePath "%~dp0build-sp\demo_d3d11_human_release.cpp"
+if errorlevel 1 exit /b 1
 
 cmake --build build-sp --config Release --parallel
 if errorlevel 1 exit /b 1
