@@ -5,9 +5,8 @@ $code=Get-Content -LiteralPath $SourcePath -Raw
 $original=$code
 function RR([string]$a,[string]$b,[string]$n){if(-not $script:code.Contains($a)){throw "No encontre: $n"};$script:code=$script:code.Replace($a,$b)}
 
-# 1-2) PISO: usar la geometria REAL de hex_grass.obj, repetida con el paso exacto de su huella.
-# No se genera una tapa plana sustituta. La pieza completa llena el piso. Las celdas transitables
-# usan exactamente la misma geometria, pero se dibujan sin textura.
+# 1-2) PISO: usar la geometria REAL de hex_grass.obj y calcular la reticula desde su huella real.
+# Todas las piezas usan la misma geometria. Solo cambia el material: suelo texturizado o transito sin textura.
 $oldFloor=@'
 static void appendHexCell(float cx,float cz,float S,std::vector<Vertex>& dstV,std::vector<uint32_t>& dstI){
     // Huella exterior real de hex_grass.obj: x +/-1.0, z +/-1.154700.
@@ -63,21 +62,26 @@ static bool loadFloorTileCPU(const std::wstring& path,std::vector<Vertex>& outV,
 }
 static void appendFloorTile(const std::vector<Vertex>& srcV,const std::vector<uint32_t>& srcI,float cx,float cz,float S,std::vector<Vertex>& dstV,std::vector<uint32_t>& dstI){
     uint32_t base=(uint32_t)dstV.size();dstV.reserve(dstV.size()+srcV.size());dstI.reserve(dstI.size()+srcI.size());
-    for(const auto& sv:srcV){Vertex v=sv;float x=cx+sv.p.x*S,z=cz+sv.p.z*S;v.p={x,groundH(x,z)+sv.p.y*S+.090f,z};dstV.push_back(v);}for(uint32_t i:srcI)dstI.push_back(base+i);
+    for(const auto& sv:srcV){Vertex v=sv;float x=cx+sv.p.x*S,z=cz+sv.p.z*S;v.p={x,groundH(x,z)+sv.p.y*S+.090f,z};v.uv={x*.045f,z*.045f};dstV.push_back(v);}for(uint32_t i:srcI)dstI.push_back(base+i);
 }
 static bool buildHexFloor(){
     killMesh(g_hexFloorTextured);killMesh(g_hexFloorTransit);
-    std::vector<Vertex> tileV;if(tileV.empty()){}std::vector<uint32_t> tileI;
+    std::vector<Vertex> tileV;std::vector<uint32_t> tileI;
     if(!loadFloorTileCPU(L"ExternalAssets\\KayKitMedieval\\Assets\\obj\\tiles\\base\\hex_grass.obj",tileV,tileI))return false;
+    float minX=FLT_MAX,maxX=-FLT_MAX,minZ=FLT_MAX,maxZ=-FLT_MAX;
+    for(const auto& v:tileV){minX=(std::min)(minX,v.p.x);maxX=(std::max)(maxX,v.p.x);minZ=(std::min)(minZ,v.p.z);maxZ=(std::max)(maxZ,v.p.z);}
     std::vector<Vertex> texV,plainV;std::vector<uint32_t> texI,plainI;
-    const float S=1.55f;const float W=2.0f*S;const float H=2.309401f*S;const float ROW=1.7320508f*S;const float COVER=190.f;
-    int rMin=(int)floorf((-COVER-H)/ROW)-2,rMax=(int)ceilf((COVER+H)/ROW)+2;
-    int cMin=(int)floorf((-COVER-W)/W)-3,cMax=(int)ceilf((COVER+W)/W)+3;
-    for(int r=rMin;r<=rMax;++r){float cz=r*ROW;float xoff=(r&1)?W*.5f:0.f;for(int c=cMin;c<=cMax;++c){float cx=c*W+xoff;if(cx<-COVER-W||cx>COVER+W||cz<-COVER-H||cz>COVER+H)continue;bool transit=blocksGameplay(cx,cz,S*1.16f);if(transit)appendFloorTile(tileV,tileI,cx,cz,S,plainV,plainI);else appendFloorTile(tileV,tileI,cx,cz,S,texV,texI);}}
+    const float S=1.55f;const float tileW=(maxX-minX)*S;const float tileH=(maxZ-minZ)*S;const float row=tileH*.75f;const float COVER=190.f;const float radius=(std::max)(tileW*.5f,tileH*.5f);
+    int rMin=(int)floorf((-COVER-tileH)/row)-2,rMax=(int)ceilf((COVER+tileH)/row)+2;
+    int cMin=(int)floorf((-COVER-tileW)/tileW)-3,cMax=(int)ceilf((COVER+tileW)/tileW)+3;
+    for(int r=rMin;r<=rMax;++r){float cz=r*row;float xoff=(r&1)?tileW*.5f:0.f;for(int c=cMin;c<=cMax;++c){float cx=c*tileW+xoff;if(cx<-COVER-tileW||cx>COVER+tileW||cz<-COVER-tileH||cz>COVER+tileH)continue;bool transit=blocksGameplay(cx,cz,radius);if(transit)appendFloorTile(tileV,tileI,cx,cz,S,plainV,plainI);else appendFloorTile(tileV,tileI,cx,cz,S,texV,texI);}}
     if(texV.empty()||plainV.empty())return false;bool a=makeMesh(texV,texI,g_hexFloorTextured,false);bool b=makeMesh(plainV,plainI,g_hexFloorTransit,false);return a&&b;
 }
 '@
 RR $oldFloor $newFloor 'piso con geometria original del rombo'
+
+# El suelo visible es la reticula de piezas. No dejar la lamina continua antigua encima/debajo confundiendo el resultado.
+RR 'drawMeshWorld(g_terrain,XMMatrixIdentity(),{.92f,.92f,.92f,1},1,g_groundSRV);drawMeshWorld(g_hexFloorTextured,XMMatrixIdentity(),{1,1,1,1},1,g_groundSRV);drawMeshWorld(g_hexFloorTransit,XMMatrixIdentity(),{.58f,.54f,.46f,1},0,nullptr);' 'drawMeshWorld(g_hexFloorTextured,XMMatrixIdentity(),{1,1,1,1},1,g_groundSRV);drawMeshWorld(g_hexFloorTransit,XMMatrixIdentity(),{.58f,.54f,.46f,1},0,nullptr);' 'quitar lamina continua de suelo del render'
 
 # 3) CONSTRUCCIONES: escala natural del propio modelo (1.0). No se inventan alturas objetivo.
 $oldAdd='static void addSceneMesh(MeshGPU* m,float x,float z,float yaw,float target,bool coll,ID3D11ShaderResourceView* tex,XMFLOAT4 tint={1,1,1,1},float yoff=0){if(!m)return;float sc=meshScale(*m,target);g_scene.push_back({m,x,z,yaw,sc,coll,tex,tint,yoff});}'
@@ -101,4 +105,4 @@ $code=$code.Replace('if(g_gameState==GameState::Victory && keyPressed(''R'')) re
 
 if($code -eq $original){throw 'El parche v12 no produjo cambios.'}
 Set-Content -LiteralPath $SourcePath -Value $code -Encoding UTF8 -NoNewline
-Write-Host 'Mapa v12 aplicado: rombos originales calzados sin huecos, textura solo fuera de transito, construcciones a escala natural y sin reinicio al ganar.'
+Write-Host 'Mapa v12 aplicado: rombos originales calzados por su huella real, textura de suelo por UV mundial, transito sin textura, construcciones a escala natural y sin reinicio al ganar.'
