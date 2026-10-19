@@ -7,14 +7,27 @@ if errorlevel 1 (
   exit /b 1
 )
 
-rem Curated CC0 assets are fetched automatically for the prototype.
+rem Curated CC0 ground textures.
 if not exist "ExternalAssets\PolyHaven\manifest.csv" (
   echo.
-  echo Descargando recursos CC0 seleccionados para el prototipo...
+  echo Descargando texturas CC0 del terreno...
   powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\fetch_cc0_assets.ps1"
   if errorlevel 1 (
+    echo ERROR: No pude descargar las texturas CC0 requeridas.
+    exit /b 1
+  )
+)
+
+rem Import the KayKit pack the user already downloaded. The script searches the
+rem repo root, Downloads and Desktop automatically.
+if not exist "ExternalAssets\KayKitDungeon\crates_stacked.obj" (
+  echo.
+  echo Importando escenario KayKit Dungeon...
+  powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\import_kaykit_dungeon.ps1"
+  if errorlevel 1 (
     echo.
-    echo ERROR: No pude descargar los recursos CC0 requeridos.
+    echo ERROR: No pude importar KayKit_Dungeon_Pack_1.1_FREE.zip.
+    echo Deja el ZIP en Descargas, Escritorio o en la raiz del repositorio.
     exit /b 1
   )
 )
@@ -36,10 +49,8 @@ if not errorlevel 1 (
 :demo_unlocked
 cmake -S SPBuild -B build-sp -A Win32
 if errorlevel 1 exit /b 1
-
 cmake --build build-sp --config Release --parallel
 if errorlevel 1 exit /b 1
-
 ctest --test-dir build-sp -C Release --output-on-failure
 if errorlevel 1 exit /b 1
 
