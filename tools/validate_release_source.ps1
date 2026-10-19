@@ -21,7 +21,9 @@ $required=@(
   'drawMeshWorld(g_hexFloorTextured,XMMatrixIdentity(),{1,1,1,1},1,g_groundSRV)',
   'drawMeshWorld(g_hexFloorTransit',
   'g_boundaryWallMesh',
-  'const int N=52',
+  'const int N=80',
+  'g_dungeonFullSRV',
+  'clampf(c.pos.x,-113.5f,113.5f)',
   'Rig_Medium_CombatMelee.glb',
   'Melee_1H_Attack_Chop',
   'forearm',
@@ -42,4 +44,4 @@ $forbidden=@(
 )
 foreach($token in $forbidden){if($code.Contains($token)){throw "Release invalido: todavia contiene $token"}}
 
-Write-Host 'Fuente final validado: piso hexagonal sin huecos y con textura de suelo, hexes transitables sin textura, NPC en carriles/campamentos, muro perimetral, combate animado y respawn automatico.'
+Write-Host 'Fuente final validado: piso hexagonal sin huecos y con textura de suelo, transito sin textura, NPC/oleadas, muro perimetral Dungeon continuo, combate animado y respawn automatico.'
