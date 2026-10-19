@@ -42,9 +42,21 @@ if(WIN32)
         endif()
     endif()
 
-    add_executable(sp_demo WIN32 demo_d3d11_characters.cpp)
+    # The character prototype reuses terrain/renderer helpers from the previous
+    # D3D11 prototype. Generate the TU with that old render() locally renamed so
+    # the new character renderer can own render() without a duplicate definition.
+    file(READ "${CMAKE_CURRENT_SOURCE_DIR}/demo_d3d11_characters.cpp" SP_CHAR_SOURCE)
+    string(REPLACE
+        "#define wnd legacy_blob_wnd\n#include \"demo_d3d11_nonnewtonian.cpp\"\n#undef wnd"
+        "#define wnd legacy_blob_wnd\n#define render legacy_blob_render\n#include \"demo_d3d11_nonnewtonian.cpp\"\n#undef render\n#undef wnd"
+        SP_CHAR_SOURCE "${SP_CHAR_SOURCE}")
+    set(SP_CHAR_GENERATED "${CMAKE_CURRENT_BINARY_DIR}/demo_d3d11_characters.generated.cpp")
+    file(WRITE "${SP_CHAR_GENERATED}" "${SP_CHAR_SOURCE}")
+
+    add_executable(sp_demo WIN32 "${SP_CHAR_GENERATED}")
     target_link_libraries(sp_demo PRIVATE sp_core user32 d3d11 dxgi d3dcompiler windowscodecs ole32)
     target_include_directories(sp_demo PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/../GeneralsMD/Code/GameEngine/Include
         ${CGLTF_DIR}
     )
