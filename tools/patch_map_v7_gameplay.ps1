@@ -31,7 +31,12 @@ RR 'buildLaneRibbon(laneTop(),0);buildLaneRibbon(laneMid(),1);buildLaneRibbon(la
 RR 'g_blueTowerMesh=g_redTowerMesh=g_blueCoreMesh=g_redCoreMesh=nullptr;' 'g_blueTowerMesh=g_redTowerMesh=g_blueCoreMesh=g_redCoreMesh=g_boundaryWallMesh=nullptr;' 'reset muro'
 
 RR 'if(!g_attackDidHit&&phase>=.40f){g_attackDidHit=true;' 'if(!g_attackDidHit&&phase>=.40f){g_attackDidHit=true;damageNearestMob();' 'ataque contra mobs'
-RR 'updateNPC(dt);resolveCharacterPair(g_player,g_npc);updateCamera(dt);' 'updateNPC(dt);updateMobs(dt);resolveCharacterPair(g_player,g_npc);updateCamera(dt);' 'actualizacion de mobs'
+
+$loopPattern='updateNPC\(dt\);(?:resolveCharacterPair\(g_player,g_npc\);)?updateCamera\(dt\);'
+$loopReplacement='updateNPC(dt);updateMobs(dt);resolveCharacterPair(g_player,g_npc);updateCamera(dt);'
+$loopNew=[regex]::Replace($code,$loopPattern,$loopReplacement,1)
+if($loopNew -eq $code){throw 'No encontre: actualizacion de mobs'}
+$code=$loopNew
 
 $renderAnchor='static void render(){'
 $renderHelpers=@'
@@ -43,7 +48,6 @@ static void render(){
 RR $renderAnchor $renderHelpers 'render de mobs despues de drawMeshWorld'
 RR 'drawCharacter(g_npc);drawEquipment(g_npc,g_npcSword,nullptr,false);drawCharacter(g_player);' 'drawMobs();drawCharacter(g_npc);drawEquipment(g_npc,g_npcSword,nullptr,false);drawCharacter(g_player);' 'render de mobs'
 
-# Elimina cualquier ruta restante que mande a pantalla de derrota: muerte significa respawn.
 $code=$code.Replace('if(g_player.health<=0.f)g_gameState=GameState::Defeated;','if(g_player.health<=0.f){g_player.health=1.f;g_player.pos={-92.f,groundH(-92.f,-92.f),-92.f};g_player.home=g_player.pos;g_damageFlash=.65f;}')
 
 if($code -eq $original){throw 'El parche de gameplay no produjo cambios.'}
