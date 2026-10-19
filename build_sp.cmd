@@ -50,6 +50,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\patch_animation_
 if errorlevel 1 exit /b 1
 powershell -NoProfile -ExecutionPolicy Bypass -Command "Remove-Item Alias:R -ErrorAction SilentlyContinue; & '%~dp0tools\patch_world_release.ps1' -SourcePath '%~dp0build-sp\demo_d3d11_human_release.cpp'"
 if errorlevel 1 exit /b 1
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\patch_map_v2_release.ps1" -SourcePath "%~dp0build-sp\demo_d3d11_human_release.cpp"
+if errorlevel 1 exit /b 1
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\patch_equipment_release.ps1" -SourcePath "%~dp0build-sp\demo_d3d11_human_release.cpp"
 if errorlevel 1 exit /b 1
 
@@ -82,7 +84,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command "Compress-Archive -Path '
 if errorlevel 1 exit /b 1
 
 echo.
-echo SPVersion: mapa principal de cuatro packs compilado, validado y empaquetado.
+echo SPVersion: mapa principal MOBA compilado, validado y empaquetado.
 echo Ejecutable: dist\SPVersion-demo\SPVersion.exe
 echo Paquete:    dist\SPVersion-demo.zip
 endlocal
