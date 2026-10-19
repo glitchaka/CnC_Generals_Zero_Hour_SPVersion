@@ -5,6 +5,7 @@ $code=Get-Content -LiteralPath $SourcePath -Raw
 
 $required=@(
   'std::array<Mob,12>',
+  'mobLane(int lane)',
   'updateMobs(dt)',
   'damageNearestMob()',
   'drawMobs()',
@@ -12,9 +13,15 @@ $required=@(
   'g_waveNumber',
   'resolvePlayerMobCollision()',
   'target>=8.f?ey',
-  'buildGroundRibbon(',
-  'buildLaneRibbon(laneTop(),0);',
+  'buildHexFloor()',
+  'g_hexFloorTextured',
+  'g_hexFloorTransit',
+  'hex_grass.obj',
+  'blocksGameplay(cx,cz,S*1.42f)',
+  'drawMeshWorld(g_hexFloorTextured',
+  'drawMeshWorld(g_hexFloorTransit',
   'g_boundaryWallMesh',
+  'const int N=52',
   'Rig_Medium_CombatMelee.glb',
   'Melee_1H_Attack_Chop',
   'forearm',
@@ -24,9 +31,9 @@ $required=@(
 foreach($token in $required){if(-not $code.Contains($token)){throw "Release incompleto: falta $token"}}
 
 $forbidden=@(
-  'buildHexFloor()',
-  'g_hexFloorTextured',
-  'g_hexFloorTransit',
+  'buildLaneRibbon(laneTop(),0);',
+  'buildLaneRibbon(laneMid(),1);',
+  'buildLaneRibbon(laneBot(),2);',
   'drawCharacter(g_npc);',
   'g_gameState=GameState::Victory',
   'R - REINICIAR',
@@ -35,4 +42,4 @@ $forbidden=@(
 )
 foreach($token in $forbidden){if($code.Contains($token)){throw "Release invalido: todavia contiene $token"}}
 
-Write-Host 'Fuente final validado: 12 enemigos por oleada, oleadas automaticas, suelo continuo, edificios escalados por altura, sin NPC unico ni pantalla de reinicio.'
+Write-Host 'Fuente final validado: piso hexagonal continuo y texturizado, hexes transitables sin textura, NPC en tres carriles/campamentos, muro perimetral, combate animado y respawn automatico.'
