@@ -52,6 +52,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command "Remove-Item Alias:R -Err
 if errorlevel 1 exit /b 1
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\patch_map_v2_release.ps1" -SourcePath "%~dp0build-sp\demo_d3d11_human_release.cpp"
 if errorlevel 1 exit /b 1
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\patch_map_v3_polish.ps1" -SourcePath "%~dp0build-sp\demo_d3d11_human_release.cpp"
+if errorlevel 1 exit /b 1
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\patch_equipment_release.ps1" -SourcePath "%~dp0build-sp\demo_d3d11_human_release.cpp"
 if errorlevel 1 exit /b 1
 
