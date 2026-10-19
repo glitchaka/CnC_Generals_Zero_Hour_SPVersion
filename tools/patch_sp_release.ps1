@@ -8,14 +8,11 @@ if (-not (Test-Path -LiteralPath $SourcePath)) { throw "No existe el fuente gene
 $code = Get-Content -LiteralPath $SourcePath -Raw
 $original = $code
 
-# 1) Animation stability: actor movement is owned by Character::pos. Root translation
-# from imported clips must not move the rendered mesh a second time.
 $old = 'if(tr.path==AnimTrack::Translation)T[b]={v.x,v.y,v.z}; else if(tr.path==AnimTrack::Scale)S[b]={v.x,v.y,v.z}; else R[b]=v;'
 $new = 'if(tr.path==AnimTrack::Translation){if(c.bones[b].parent>=0)T[b]={v.x,v.y,v.z};} else if(tr.path==AnimTrack::Scale)S[b]={v.x,v.y,v.z}; else R[b]=v;'
 if (-not $code.Contains($old)) { throw 'No encontre el bloque de root motion esperado.' }
 $code = $code.Replace($old,$new)
 
-# 2) NPC contact stability.
 $old = 'g_npc.moving=d>1.28f;g_npc.speed=g_npc.moving?2.75f:0.f;'
 $new = 'g_npc.moving=g_npc.moving?(d>1.20f):(d>1.38f);g_npc.speed=g_npc.moving?2.75f:0.f;'
 if (-not $code.Contains($old)) { throw 'No encontre el umbral de movimiento NPC esperado.' }
@@ -44,7 +41,6 @@ static void resolveCharacterPair(Character& a,Character& b){
 if (-not $code.Contains($old)) { throw 'No encontre resolveCharacterPair esperado.' }
 $code = $code.Replace($old,$new)
 
-# 3) Real KayKit equipment in the scene.
 $old = 'static MeshGPU g_terrain,g_rubble,g_crates,g_barrel;'
 $new = 'static MeshGPU g_terrain,g_rubble,g_crates,g_barrel,g_playerSword,g_npcSword,g_playerShield;'
 if (-not $code.Contains($old)) { throw 'No encontre los meshes globales.' }
@@ -54,14 +50,10 @@ $old = 'if(!loadCharacter("ExternalAssets/KayKitAdventurers/Knight.glb",g_player
 $new = 'if(!loadOBJ(L"ExternalAssets\\KayKitAdventurers\\sword_1handed.obj",g_playerSword)||!loadOBJ(L"ExternalAssets\\KayKitAdventurers\\sword_2handed.obj",g_npcSword)||!loadOBJ(L"ExternalAssets\\KayKitAdventurers\\shield_round.obj",g_playerShield)){MessageBoxW(g_hwnd,L"Faltan las armas KayKit del demo.",L"SPVersion",MB_ICONERROR);return 4;} if(!loadCharacter("ExternalAssets/KayKitAdventurers/Knight.glb",g_player)||!loadCharacter("ExternalAssets/KayKitAdventurers/Ranger.glb",g_npc)||!loadTextureWIC(L"ExternalAssets\\KayKitAdventurers\\knight_texture.png",&g_player.texture)||!loadTextureWIC(L"ExternalAssets\\KayKitAdventurers\\ranger_texture.png",&g_npc.texture)){MessageBoxW(g_hwnd,L"No pude cargar Knight/Ranger.",L"SPVersion",MB_ICONERROR);return 5;}'
 if (-not $code.Contains($old)) { throw 'No encontre carga de personajes esperada.' }
 $code = $code.Replace($old,$new)
-$code = $code.Replace('return 5;}',$('return 6;}'),1)
 
-# 4) More distant action/MOBA camera; keep mouse wheel range useful.
 $code = $code.Replace('float dist=12.5f*g_zoom','float dist=18.5f*g_zoom')
 $code = $code.Replace('g_zoom=clampf(g_zoom,.60f,1.65f)','g_zoom=clampf(g_zoom,.72f,1.80f)')
 
-# 5) Toon treatment only for characters/equipment. Alpha in CB color is used as a
-# material flag: alpha < .75 means quantized lighting + dark rim separation.
 $old = 'float lit=.32+.62*sun+.18*sky;float3 col=base*lit;'
 $new = 'float raw=.32+.62*sun+.18*sky;float lit=raw;if(color.a<.75){lit=raw>.82?1.06:(raw>.60?.82:(raw>.40?.60:.38));float3 v=normalize(cameraPos-i.wp);float rim=1-saturate(abs(dot(n,v)));lit*=lerp(1.0,.56,smoothstep(.50,.82,rim));}float3 col=base*lit;'
 if (-not $code.Contains($old)) { throw 'No encontre el shader de iluminacion esperado.' }
@@ -86,7 +78,6 @@ $new = 'drawCharacter(g_npc);drawEquipment(g_npc,g_npcSword,nullptr,false);drawC
 if (-not $code.Contains($old)) { throw 'No encontre orden de render de personajes.' }
 $code = $code.Replace($old,$new)
 
-# 6) Legible HUD and end-state messaging using a tiny built-in 5x7 font.
 $hudPattern = '(?s)static void drawHUD\(\)\{.*?\n\}\n\nstatic void render\(\)'
 if (-not [regex]::IsMatch($code,$hudPattern)) { throw 'No encontre drawHUD generado.' }
 $hud = @'
@@ -121,13 +112,11 @@ static void render()
 '@
 $code = [regex]::Replace($code,$hudPattern,$hud,1)
 
-# Restart must always work; Enter also retries after death/victory.
 $old = "case WM_KEYDOWN:if(w<256)g_keys[w]=true;if(w=='R'&&g_gameState!=GameState::Playing)resetGame();if(w==VK_ESCAPE)DestroyWindow(h);return 0;"
 $new = "case WM_KEYDOWN:if(w<256)g_keys[w]=true;if(w=='R'||((w==VK_RETURN)&&g_gameState!=GameState::Playing))resetGame();if(w==VK_ESCAPE)DestroyWindow(h);return 0;"
 if (-not $code.Contains($old)) { throw 'No encontre WM_KEYDOWN de reinicio.' }
 $code = $code.Replace($old,$new)
 
-# Release the added equipment meshes.
 $old = 'killCharacter(g_npc);killCharacter(g_player);killMesh(g_barrel);killMesh(g_crates);killMesh(g_rubble);killMesh(g_terrain);'
 $new = 'killCharacter(g_npc);killCharacter(g_player);killMesh(g_playerShield);killMesh(g_npcSword);killMesh(g_playerSword);killMesh(g_barrel);killMesh(g_crates);killMesh(g_rubble);killMesh(g_terrain);'
 if (-not $code.Contains($old)) { throw 'No encontre limpieza de meshes.' }
