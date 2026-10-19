@@ -16,7 +16,11 @@ $required=@(
   'loadFloorTileCPU',
   'appendFloorTile',
   'hex_grass.obj',
-  'blocksGameplay(cx,cz,S*1.16f)',
+  'const float tileW=(maxX-minX)*S',
+  'const float tileH=(maxZ-minZ)*S',
+  'const float row=tileH*.75f',
+  'v.uv={x*.045f,z*.045f}',
+  'blocksGameplay(cx,cz,radius)',
   'drawMeshWorld(g_hexFloorTextured,XMMatrixIdentity(),{1,1,1,1},1,g_groundSRV)',
   'drawMeshWorld(g_hexFloorTransit',
   'addSceneMeshNatural',
@@ -38,6 +42,7 @@ $forbidden=@(
   'buildLaneRibbon(laneMid(),1);',
   'buildLaneRibbon(laneBot(),2);',
   'drawCharacter(g_npc);',
+  'drawMeshWorld(g_terrain,XMMatrixIdentity(),{.92f,.92f,.92f,1},1,g_groundSRV);drawMeshWorld(g_hexFloorTextured',
   'R - REINICIAR',
   'Victory&&keyPressed(''R'')',
   'Victory && keyPressed(''R'')',
@@ -46,4 +51,4 @@ $forbidden=@(
 )
 foreach($token in $forbidden){if($code.Contains($token)){throw "Release invalido: todavia contiene $token"}}
 
-Write-Host 'Fuente final validado: rombos originales calzados sin huecos, suelo texturizado salvo transito, construcciones a escala natural y victoria sin reinicio.'
+Write-Host 'Fuente final validado: piso visible hecho con hex_grass calzado por su huella real, textura de suelo por UV mundial, transito con la misma geometria sin textura, construcciones a escala natural y victoria sin reinicio.'
