@@ -14,6 +14,11 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Cache external assets
+        uses: actions/cache@v4
+        with:
+          path: ExternalAssets
+          key: sp-assets-${{ runner.os }}-${{ hashFiles('tools/fetch_kaykit_full_packs.ps1', 'tools/prepare_runtime_assets_from_full.ps1', 'tools/fetch_cc0_assets.ps1', 'tools/fetch_kenney_ui.ps1') }}
       - name: Build final playable demo
         shell: cmd
         run: build_sp.cmd
