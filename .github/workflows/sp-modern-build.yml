@@ -12,6 +12,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Configure
         run: cmake -S SPBuild -B build-sp -A Win32
+      - name: Stabilize generated release source
+        shell: powershell
+        run: .\tools\patch_sp_release.ps1 -SourcePath .\build-sp\demo_d3d11_human_release.cpp
       - name: Build
         run: cmake --build build-sp --config Release --parallel
       - name: Test
