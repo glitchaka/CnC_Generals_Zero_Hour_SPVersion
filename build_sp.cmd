@@ -25,16 +25,22 @@ if not exist "ExternalAssets\KayKitDungeon\crates_stacked.obj" (
   )
 )
 
-if not exist "ExternalAssets\KayKitAdventurers\Knight.glb" (
-  echo.
-  echo Preparando personajes KayKit Adventurers...
-  powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\fetch_kaykit_adventurers.ps1"
-  if errorlevel 1 (
-    echo ERROR: No pude preparar Knight/Ranger de KayKit Adventurers.
-    exit /b 1
-  )
+if not exist "ExternalAssets\KayKitAdventurers\Knight.glb" goto fetch_adventurers
+if not exist "ExternalAssets\KayKitAdventurers\sword_1handed.obj" goto fetch_adventurers
+if not exist "ExternalAssets\KayKitAdventurers\sword_2handed.obj" goto fetch_adventurers
+if not exist "ExternalAssets\KayKitAdventurers\shield_round.obj" goto fetch_adventurers
+goto adventurers_ready
+
+:fetch_adventurers
+echo.
+echo Preparando personajes y armas KayKit Adventurers...
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\fetch_kaykit_adventurers.ps1"
+if errorlevel 1 (
+  echo ERROR: No pude preparar personajes/armas KayKit Adventurers.
+  exit /b 1
 )
 
+:adventurers_ready
 if not exist "ExternalAssets\KenneyUI\panel_blue.png" (
   echo.
   echo Preparando interfaz Kenney UI...
@@ -70,8 +76,6 @@ if errorlevel 1 exit /b 1
 ctest --test-dir build-sp -C Release --output-on-failure
 if errorlevel 1 exit /b 1
 
-rem Make the raw build executable runnable in-place too. The application resolves
-rem assets relative to its own executable directory.
 set "BUILD_ASSETS=%~dp0build-sp\Release\ExternalAssets"
 if exist "%BUILD_ASSETS%" rmdir /S /Q "%BUILD_ASSETS%"
 mkdir "%BUILD_ASSETS%"
