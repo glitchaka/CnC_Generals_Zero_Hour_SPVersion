@@ -16,9 +16,9 @@ $required=@(
   'buildHexFloor()',
   'g_hexFloorTextured',
   'g_hexFloorTransit',
-  'hex_grass.obj',
-  'blocksGameplay(cx,cz,S*1.42f)',
-  'drawMeshWorld(g_hexFloorTextured',
+  'Huella exterior real de hex_grass.obj',
+  'blocksGameplay(cx,cz,S*1.16f)',
+  'drawMeshWorld(g_hexFloorTextured,XMMatrixIdentity(),{1,1,1,1},1,g_groundSRV)',
   'drawMeshWorld(g_hexFloorTransit',
   'g_boundaryWallMesh',
   'const int N=52',
@@ -42,4 +42,4 @@ $forbidden=@(
 )
 foreach($token in $forbidden){if($code.Contains($token)){throw "Release invalido: todavia contiene $token"}}
 
-Write-Host 'Fuente final validado: piso hexagonal continuo y texturizado, hexes transitables sin textura, NPC en tres carriles/campamentos, muro perimetral, combate animado y respawn automatico.'
+Write-Host 'Fuente final validado: piso hexagonal sin huecos y con textura de suelo, hexes transitables sin textura, NPC en carriles/campamentos, muro perimetral, combate animado y respawn automatico.'
