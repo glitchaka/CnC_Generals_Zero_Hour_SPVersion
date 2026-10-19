@@ -8,35 +8,6 @@ if errorlevel 1 (
   exit /b 1
 )
 
-if not exist "ExternalAssets\PolyHaven\manifest.csv" (
-  echo.
-  echo Descargando texturas CC0 del terreno...
-  powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\fetch_cc0_assets.ps1"
-  if errorlevel 1 exit /b 1
-)
-
-if not exist "ExternalAssets\KayKitDungeon\crates_stacked.obj" (
-  echo.
-  echo Preparando escenario KayKit Dungeon...
-  powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\fetch_kaykit_dungeon.ps1"
-  if errorlevel 1 exit /b 1
-)
-
-if not exist "ExternalAssets\KayKitAdventurers\Knight.glb" goto fetch_adventurers
-if not exist "ExternalAssets\KayKitAdventurers\sword_1handed.obj" goto fetch_adventurers
-if not exist "ExternalAssets\KayKitAdventurers\sword_2handed.obj" goto fetch_adventurers
-if not exist "ExternalAssets\KayKitAdventurers\shield_round.obj" goto fetch_adventurers
-if not exist "ExternalAssets\KayKitAdventurers\Rig_Medium_CombatMelee.glb" goto fetch_adventurers
-if not exist "ExternalAssets\KayKitAdventurers\Rig_Medium_MovementAdvanced.glb" goto fetch_adventurers
-goto adventurers_ready
-
-:fetch_adventurers
-echo.
-echo Preparando personajes, armas y animaciones KayKit...
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\fetch_kaykit_adventurers.ps1"
-if errorlevel 1 exit /b 1
-
-:adventurers_ready
 if not exist "ExternalAssets\KayKitForest\Assets\obj\forest_texture.png" goto fetch_full_packs
 if not exist "ExternalAssets\KayKitMedieval\Textures\hexagons_medieval.png" goto fetch_full_packs
 if not exist "ExternalAssets\KayKitDungeonFull\Assets\textures\dungeon_texture.png" goto fetch_full_packs
@@ -50,6 +21,16 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\fetch_kaykit_ful
 if errorlevel 1 exit /b 1
 
 :full_packs_ready
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\prepare_runtime_assets_from_full.ps1"
+if errorlevel 1 exit /b 1
+
+if not exist "ExternalAssets\PolyHaven\manifest.csv" (
+  echo.
+  echo Descargando texturas CC0 del terreno...
+  powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\fetch_cc0_assets.ps1"
+  if errorlevel 1 exit /b 1
+)
+
 if not exist "ExternalAssets\KenneyUI\panel_blue.png" (
   echo.
   echo Preparando interfaz Kenney UI...
