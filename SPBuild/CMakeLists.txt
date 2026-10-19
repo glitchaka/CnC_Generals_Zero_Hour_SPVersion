@@ -27,7 +27,7 @@ target_include_directories(sp_smoke PRIVATE
 )
 
 if(WIN32)
-    add_executable(sp_demo WIN32 demo_d3d11_playable.cpp)
+    add_executable(sp_demo WIN32 demo_d3d11_playable_mouse.cpp)
     target_link_libraries(sp_demo PRIVATE sp_core user32 d3d11 dxgi d3dcompiler windowscodecs ole32)
     target_include_directories(sp_demo PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/../GeneralsMD/Code/GameEngine/Include
