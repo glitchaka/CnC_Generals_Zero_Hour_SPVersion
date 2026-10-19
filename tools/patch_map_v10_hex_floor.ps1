@@ -32,7 +32,9 @@ static bool buildHexFloor(){
     killMesh(g_hexFloorTextured);killMesh(g_hexFloorTransit);
     std::vector<Vertex> srcV;std::vector<uint32_t> srcI;if(!loadHexTileCPU(L"ExternalAssets\\KayKitMedieval\\Assets\\obj\\tiles\\base\\hex_grass.obj",srcV,srcI))return false;
     std::vector<Vertex> texV,plainV;std::vector<uint32_t> texI,plainI;
-    const float S=2.35f;const float W=2.0f*S;const float H=2.3094f*S;const float ROW=H*.75f;const float COVER=132.f;
+    // hex_grass mide 2.0 x 2.3094. Pointy-top: columnas a W y filas a 3/4 H,
+    // desplazando media columna las filas impares. Esa es la teselacion exacta, sin huecos.
+    const float S=2.35f;const float W=2.0f*S;const float H=2.3094f*S;const float ROW=H*.75f;const float COVER=170.f;
     int rMin=(int)floorf((-COVER-H)/ROW)-2,rMax=(int)ceilf((COVER+H)/ROW)+2;
     int cMin=(int)floorf((-COVER-W)/W)-3,cMax=(int)ceilf((COVER+W)/W)+3;
     for(int r=rMin;r<=rMax;++r){float cz=r*ROW;float xoff=(r&1)?W*.5f:0.f;for(int c=cMin;c<=cMax;++c){float cx=c*W+xoff;if(cx<-COVER-W||cx>COVER+W||cz<-COVER-H||cz>COVER+H)continue;bool transit=blocksGameplay(cx,cz,S*1.42f);if(transit)appendHexTile(srcV,srcI,cx,cz,S,plainV,plainI);else appendHexTile(srcV,srcI,cx,cz,S,texV,texI);}}
@@ -54,4 +56,4 @@ if($code.Contains($cleanupOld)){$code=$code.Replace($cleanupOld,$cleanupNew)}
 
 if($code -eq $original){throw 'El parche v10 no produjo cambios.'}
 Set-Content -LiteralPath $SourcePath -Value $code -Encoding UTF8 -NoNewline
-Write-Host 'Piso v10 aplicado: hex_grass calzado sin huecos, textura continua fuera de transito y hexes sin textura en toda via transitable.'
+Write-Host 'Piso v10 aplicado: hex_grass calzado sin huecos hasta fuera del muro, textura continua fuera de transito y hexes sin textura en toda via transitable.'
