@@ -61,9 +61,27 @@ if not errorlevel 1 (
 :demo_unlocked
 cmake -S SPBuild -B build-sp -A Win32
 if errorlevel 1 exit /b 1
+
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\patch_sp_release.ps1" -SourcePath "%~dp0build-sp\demo_d3d11_human_release.cpp"
+if errorlevel 1 exit /b 1
+
 cmake --build build-sp --config Release --parallel
 if errorlevel 1 exit /b 1
 ctest --test-dir build-sp -C Release --output-on-failure
+if errorlevel 1 exit /b 1
+
+rem Make the raw build executable runnable in-place too. The application resolves
+rem assets relative to its own executable directory.
+set "BUILD_ASSETS=%~dp0build-sp\Release\ExternalAssets"
+if exist "%BUILD_ASSETS%" rmdir /S /Q "%BUILD_ASSETS%"
+mkdir "%BUILD_ASSETS%"
+xcopy /E /I /Y /Q "ExternalAssets\KayKitDungeon" "%BUILD_ASSETS%\KayKitDungeon" >nul
+if errorlevel 1 exit /b 1
+xcopy /E /I /Y /Q "ExternalAssets\KayKitAdventurers" "%BUILD_ASSETS%\KayKitAdventurers" >nul
+if errorlevel 1 exit /b 1
+xcopy /E /I /Y /Q "ExternalAssets\KenneyUI" "%BUILD_ASSETS%\KenneyUI" >nul
+if errorlevel 1 exit /b 1
+xcopy /E /I /Y /Q "ExternalAssets\PolyHaven" "%BUILD_ASSETS%\PolyHaven" >nul
 if errorlevel 1 exit /b 1
 
 set "DIST=%~dp0dist\SPVersion-demo"
@@ -89,6 +107,7 @@ if errorlevel 1 exit /b 1
 
 echo.
 echo SPVersion demo compilado, validado y empaquetado.
-echo Ejecutable: dist\SPVersion-demo\SPVersion.exe
-echo Paquete:    dist\SPVersion-demo.zip
+echo Ejecutable directo: build-sp\Release\sp_demo.exe
+echo Ejecutable entrega: dist\SPVersion-demo\SPVersion.exe
+echo Paquete:           dist\SPVersion-demo.zip
 endlocal
