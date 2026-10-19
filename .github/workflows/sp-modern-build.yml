@@ -10,12 +10,12 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Configure
-        run: cmake -S SPBuild -B build-sp -A Win32
-      - name: Stabilize generated release source
-        shell: powershell
-        run: .\tools\patch_sp_release.ps1 -SourcePath .\build-sp\demo_d3d11_human_release.cpp
-      - name: Build
-        run: cmake --build build-sp --config Release --parallel
-      - name: Test
-        run: ctest --test-dir build-sp -C Release --output-on-failure
+      - name: Build final playable demo
+        shell: cmd
+        run: build_sp.cmd
+      - name: Upload packaged demo
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: SPVersion-demo
+          path: dist/SPVersion-demo.zip
