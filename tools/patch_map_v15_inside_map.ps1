@@ -5,6 +5,10 @@ $code=Get-Content -LiteralPath $SourcePath -Raw
 $original=$code
 function RR([string]$a,[string]$b,[string]$n){if(-not $script:code.Contains($a)){throw "No encontre: $n"};$script:code=$script:code.Replace($a,$b)}
 
+# No reducir ninguna malla por debajo de su escala authored. El parametro target solo puede ampliar,
+# nunca encoger un modelo que ya tiene su tamano natural.
+RR 'static float meshScale(const MeshGPU& m,float target){float ex=m.bmax.x-m.bmin.x,ey=m.bmax.y-m.bmin.y,ez=m.bmax.z-m.bmin.z,e=(std::max)(.01f,(std::max)(ex,(std::max)(ey,ez)));return target/e;}' 'static float meshScale(const MeshGPU& m,float target){float ex=m.bmax.x-m.bmin.x,ey=m.bmax.y-m.bmin.y,ez=m.bmax.z-m.bmin.z,e=(std::max)(.01f,(std::max)(ex,(std::max)(ey,ez)));return (std::max)(1.0f,target/e);}' 'preservar escala nativa de modelos'
+
 # Nunca mandar assets sobrantes fuera del mapa. Buscar una posicion interior libre y reutilizar la malla completa.
 $oldScenic='static void scenicBelt(MeshGPU* m,uint32_t h,float target,ID3D11ShaderResourceView* tex){float a=(h%6283)*.001f;float band=(float)((h/41)%4);float rad=121.5f+band*7.5f+(float)((h/17)%500)/100.f;float x=cosf(a)*rad,z=sinf(a)*rad;addSceneMesh(m,x,z,-a,target,false,tex,{.92f,.94f,.98f,1});}'
 $newScenic=@'
@@ -48,4 +52,4 @@ $code=$code.Replace('bool team=(h&1u)==0;float cx=team?-92.f:92.f,cz=team?-92.f:
 
 if($code -eq $original){throw 'El parche v15 no produjo cambios.'}
 Set-Content -LiteralPath $SourcePath -Value $code -Encoding UTF8 -NoNewline
-Write-Host 'Mapa v15 aplicado: sin basurero exterior; edificios completos y decoracion dentro del area jugable.'
+Write-Host 'Mapa v15 aplicado: escala nativa preservada; sin basurero exterior; edificios completos y decoracion dentro del area jugable.'
