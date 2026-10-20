@@ -6,8 +6,15 @@ $original=$code
 function RR([string]$a,[string]$b,[string]$n){if(-not $script:code.Contains($a)){throw "No encontre: $n"};$script:code=$script:code.Replace($a,$b)}
 
 # No reducir ninguna malla por debajo de su escala authored. El parametro target solo puede ampliar,
-# nunca encoger un modelo que ya tiene su tamano natural.
-RR 'static float meshScale(const MeshGPU& m,float target){float ex=m.bmax.x-m.bmin.x,ey=m.bmax.y-m.bmin.y,ez=m.bmax.z-m.bmin.z,e=(std::max)(.01f,(std::max)(ex,(std::max)(ey,ez)));return target/e;}' 'static float meshScale(const MeshGPU& m,float target){float ex=m.bmax.x-m.bmin.x,ey=m.bmax.y-m.bmin.y,ez=m.bmax.z-m.bmin.z,e=(std::max)(.01f,(std::max)(ex,(std::max)(ey,ez)));return (std::max)(1.0f,target/e);}' 'preservar escala nativa de modelos'
+# nunca encoger un modelo que ya tiene su tamano natural. v7 ya cambia la formula para edificios,
+# por eso este parche modifica solo el retorno y no depende de una firma vieja exacta.
+if($code.Contains('return (std::max)(1.0f,target/e);')){
+    # Ya preserva escala nativa.
+} elseif($code.Contains('return target/e;}')){
+    $code=$code.Replace('return target/e;}','return (std::max)(1.0f,target/e);}')
+} else {
+    throw 'No encontre el retorno de meshScale para preservar escala nativa.'
+}
 
 # Nunca mandar assets sobrantes fuera del mapa. Buscar una posicion interior libre y reutilizar la malla completa.
 $oldScenic='static void scenicBelt(MeshGPU* m,uint32_t h,float target,ID3D11ShaderResourceView* tex){float a=(h%6283)*.001f;float band=(float)((h/41)%4);float rad=121.5f+band*7.5f+(float)((h/17)%500)/100.f;float x=cosf(a)*rad,z=sinf(a)*rad;addSceneMesh(m,x,z,-a,target,false,tex,{.92f,.94f,.98f,1});}'
@@ -39,7 +46,8 @@ RR $oldBase $newBase 'edificios completos dentro del mapa'
 # Nada del pack medieval que no sea camino/rio/edificio debe formar un basurero exterior.
 RR 'scenicBelt(m,h,building?4.1f:1.8f,tex);return;' 'if(!building)scenicBelt(m,h,1.8f,tex);return;' 'descartar edificios sobrantes fuera de bases'
 
-# Menos props decorativos, todos interiores. El objetivo es lectura clara del mapa, no exhibir el pack.
+# Props de bosque/dungeon solo se colocan donde realmente construyen la jungla/objetivos.
+# No se encogen: si entran, conservan su escala nativa o mayor.
 $oldForest='if(kind==0){target=cliff?5.5f:(tree?4.1f:(plant?1.1f:(rock?2.0f:1.5f)));coll=tree||cliff||rock;float r=coll?target*.42f:.15f;bool active=(h%5u)==0u;if(active&&chooseJungleSlot(h,r,x,z)){addSceneMesh(m,x,z,yaw,target,coll,tex);return;}scenicBelt(m,h,target*.72f,tex);return;}'
 $newForest='if(kind==0){target=cliff?5.5f:(tree?4.1f:(plant?1.1f:(rock?2.0f:1.5f)));coll=tree||cliff||rock;float r=coll?target*.42f:.15f;bool active=(h%9u)==0u;if(active&&chooseJungleSlot(h,r,x,z)){addSceneMesh(m,x,z,yaw,target,coll,tex);return;}return;}'
 if($code.Contains($oldForest)){$code=$code.Replace($oldForest,$newForest)}
