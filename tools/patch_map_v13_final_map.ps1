@@ -40,3 +40,4 @@ if(-not $code.Contains('drawMeshWorld(g_hexFloorTransit')){throw 'Falta el piso 
 if($code -eq $original){throw 'El parche v13 no produjo cambios.'}
 Set-Content -LiteralPath $SourcePath -Value $code -Encoding UTF8 -NoNewline
 Write-Host 'Mapa v13 aplicado: edificios, torres, nucleos y muro con escala arquitectonica; jungla legible; piso hexagonal continuo preservado.'
+& (Join-Path $PSScriptRoot 'patch_map_v14_runtime_budget.ps1') -SourcePath $SourcePath
