@@ -77,9 +77,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\patch_map_v12_re
 if errorlevel 1 exit /b 1
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\patch_map_v13_final_map.ps1" -SourcePath "%~dp0build-sp\demo_d3d11_human_release.cpp"
 if errorlevel 1 exit /b 1
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\patch_map_v14_runtime_budget.ps1" -SourcePath "%~dp0build-sp\demo_d3d11_human_release.cpp"
-if errorlevel 1 exit /b 1
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\patch_map_v15_inside_map.ps1" -SourcePath "%~dp0build-sp\demo_d3d11_human_release.cpp"
+if errorlevel 1 exit /b 1
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\patch_map_v16_visibility_performance.ps1" -SourcePath "%~dp0build-sp\demo_d3d11_human_release.cpp"
 if errorlevel 1 exit /b 1
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\patch_equipment_release.ps1" -SourcePath "%~dp0build-sp\demo_d3d11_human_release.cpp"
 if errorlevel 1 exit /b 1
