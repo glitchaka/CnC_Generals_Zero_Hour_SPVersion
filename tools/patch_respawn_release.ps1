@@ -4,6 +4,13 @@ if(-not(Test-Path -LiteralPath $SourcePath)){throw "No existe el fuente generado
 $code=Get-Content -LiteralPath $SourcePath -Raw
 $original=$code
 
+# El parche de gameplay inserta resolvePlayerMobCollision antes de la definicion de
+# resolveCharacter. MSVC necesita una declaracion previa para que el fuente generado compile.
+$collisionAnchor='static void resolvePlayerMobCollision(){'
+if($code.Contains($collisionAnchor) -and -not $code.Contains('static void resolveCharacter(Character& c);')){
+  $code=$code.Replace($collisionAnchor,"static void resolveCharacter(Character& c);`n$collisionAnchor")
+}
+
 $needle='syncClientSize();updatePlayer(dt);'
 $replacement='syncClientSize();if(g_gameState==GameState::Defeated){g_gameState=GameState::Playing;g_player.health=1.f;g_player.pos={-92.f,groundH(-92.f,-92.f),-92.f};g_player.home=g_player.pos;g_player.yaw=.78f;g_attackAnim=g_dodgeAnim=0.f;g_attackQueued=false;g_damageFlash=.65f;}updatePlayer(dt);'
 if(-not $code.Contains($needle)){throw 'No encontre el inicio del bucle de actualizacion.'}
@@ -16,4 +23,4 @@ $code=$code.Replace('else if(g_gameState==GameState::Victory){','if(g_gameState=
 
 if($code -eq $original){throw 'El parche de respawn no produjo cambios.'}
 Set-Content -LiteralPath $SourcePath -Value $code -Encoding UTF8 -NoNewline
-Write-Host 'Respawn automatico fijado: muerte vuelve a base sin pantalla ni boton de reinicio.'
+Write-Host 'Respawn automatico fijado y declaracion previa de resolveCharacter agregada.'
