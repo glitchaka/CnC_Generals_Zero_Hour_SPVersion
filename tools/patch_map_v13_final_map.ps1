@@ -3,6 +3,17 @@ $ErrorActionPreference='Stop'
 if(-not(Test-Path -LiteralPath $SourcePath)){throw "No existe el fuente generado: $SourcePath"}
 $code=Get-Content -LiteralPath $SourcePath -Raw
 $original=$code
+
+# Este pase puede ser llamado mas de una vez por una copia local antigua del build.
+# Si ya fue aplicado, salir correctamente en vez de romper despues de v18.
+if($code.Contains('static void addSceneMeshArchitecture(') -and
+   $code.Contains('addSceneMeshArchitecture(m,p.x,p.z,yaw,12.0f,true,g_medievalSRV);') -and
+   $code.Contains('addSceneMeshArchitecture(g_blueCoreMesh,-106.f,-106.f,.78f,18.0f,true,g_medievalSRV);') -and
+   $code.Contains('addSceneMeshArchitecture(g_redCoreMesh,106.f,106.f,-2.35f,18.0f,true,g_medievalSRV);')){
+    Write-Host 'Mapa v13 ya aplicado; se omite la segunda ejecucion.'
+    exit 0
+}
+
 function RR([string]$a,[string]$b,[string]$n){if(-not $script:code.Contains($a)){throw "No encontre: $n"};$script:code=$script:code.Replace($a,$b)}
 
 # Arquitectura del mapa: nunca reducir edificios por debajo de una altura fisica creible.
